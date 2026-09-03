@@ -1,6 +1,7 @@
 package sgpv;
 import java.util.HashMap;
 import java.util.Map;
+import sgpv.evento.Evento;
 
 /**
  *
