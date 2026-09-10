@@ -68,7 +68,11 @@ public class Evento {
     public int getCupos() {
         return cupos;
     }
-    
+
+    public int getCuposDisponibles() {
+        return cupos - voluntariosAsignados.size();
+    }
+
     public String getFecha() {
         return fecha;
     }

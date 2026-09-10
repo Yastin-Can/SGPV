@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import sgpv.StringUtils;
+import sgpv.evento.Evento;
+import sgpv.utils.StringUtils;
 
 /**
  *
