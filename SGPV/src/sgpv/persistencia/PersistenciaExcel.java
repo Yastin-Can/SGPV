@@ -9,14 +9,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import sgpv.evento.Evento;
+import sgpv.modelo.Evento;
 import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
-import sgpv.habilidad.Habilidad;
+import sgpv.modelo.Habilidad;
 import sgpv.modelo.GestorVoluntariado;
 import sgpv.modelo.Programa;
 import sgpv.utils.StringUtils;
-import sgpv.voluntario.Voluntario;
+import sgpv.modelo.Voluntario;
 
 /**
  * Creacion de una hoja de excel q cumple con la persistencia de datos, con

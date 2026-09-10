@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JOptionPane;
-import sgpv.evento.Evento;
+import sgpv.modelo.Evento;
 import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
-import sgpv.habilidad.Habilidad;
+import sgpv.modelo.Habilidad;
 import sgpv.modelo.GestorVoluntariado;
 import sgpv.modelo.Programa;
 import sgpv.persistencia.PersistenciaExcel;
@@ -15,7 +15,7 @@ import sgpv.ui.Vista;
 import sgpv.ui.VistaConsola;
 import sgpv.ui.VistaVentana;
 import sgpv.utils.StringUtils;
-import sgpv.voluntario.Voluntario;
+import sgpv.modelo.Voluntario;
 
 /**
  * Base del menu, q da eleccion para consola o ventana, con swing. Para hacer la gestion de programas, eventos y voluntarios.
