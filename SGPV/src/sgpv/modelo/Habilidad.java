@@ -1,4 +1,4 @@
-package sgpv.habilidad;
+package sgpv.modelo;
 
 /** Representa una habilidad que puede poseer un voluntario. */
 public class Habilidad {

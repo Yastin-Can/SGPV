@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import sgpv.evento.Evento;
+import sgpv.modelo.Evento;
 import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
-import sgpv.habilidad.Habilidad;
+import sgpv.modelo.Habilidad;
 import sgpv.utils.StringUtils;
-import sgpv.voluntario.Voluntario;
+import sgpv.modelo.Voluntario;
 
 /**
  * Clase q administra la colección principal de programas y eventos, con el registro global de voluntarios

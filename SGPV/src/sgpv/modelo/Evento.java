@@ -1,11 +1,11 @@
-package sgpv.evento;
+package sgpv.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
 import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
 import sgpv.modelo.Prioridad;
-import sgpv.voluntario.Voluntario;
+import sgpv.modelo.Voluntario;
 
 /** Representa una actividad perteneciente a un programa de voluntariado. */
 public class Evento {

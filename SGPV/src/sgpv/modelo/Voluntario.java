@@ -1,8 +1,8 @@
-package sgpv.voluntario;
+package sgpv.modelo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import sgpv.habilidad.Habilidad;
+import sgpv.modelo.Habilidad;
 
 
 /** Representa a una persona voluntaria y sus habilidades. */
