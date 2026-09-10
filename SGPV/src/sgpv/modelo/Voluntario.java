@@ -88,7 +88,9 @@ public class Voluntario {
     }
     
     public boolean agregarHabilidad(Habilidad habilidad) {
-        if (habilidad == null || tieneHabilidad(habilidad.getNombre())) {
+        if (habilidad == null || habilidad.getNombre() == null
+                || habilidad.getNombre().trim().isEmpty()
+                || tieneHabilidad(habilidad.getNombre())) {
             return false;
         }
         return habilidades.add(habilidad);
