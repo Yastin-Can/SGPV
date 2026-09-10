@@ -6,6 +6,7 @@ import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
 import sgpv.modelo.Prioridad;
 import sgpv.modelo.Voluntario;
+import sgpv.utils.StringUtils;
 
 /** Representa una actividad perteneciente a un programa de voluntariado. */
 public class Evento {
@@ -37,6 +38,12 @@ public class Evento {
 
     public Evento(String idEvento, String nombre, String lugar, String comuna,
             String fecha, int cupos, Prioridad prioridad) {
+        if (StringUtils.isBlank(idEvento)) {
+            throw new IllegalArgumentException("El id del evento no puede estar vacío");
+        }
+        if (cupos < 0) {
+            throw new IllegalArgumentException("Los cupos no pueden ser negativos");
+        }
         this.idEvento = idEvento;
         this.nombre = nombre;
         this.lugar = lugar;
@@ -52,6 +59,9 @@ public class Evento {
     }
 
     public void setIdEvento(String idEvento) {
+        if (StringUtils.isBlank(idEvento)) {
+            throw new IllegalArgumentException("El id del evento no puede estar vacío");
+        }
         this.idEvento = idEvento;
     }
 
@@ -94,6 +104,10 @@ public class Evento {
     }
 
     public void setCupos(int cupos) {
+        if (cupos < 0 || cupos < voluntariosAsignados.size()) {
+            throw new IllegalArgumentException(
+                    "Los cupos no pueden ser negativos ni menores a los voluntarios ya asignados");
+        }
         this.cupos = cupos;
     }
 
