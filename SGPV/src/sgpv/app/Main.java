@@ -449,12 +449,12 @@ public class Main {
         p1.agregarEvento("E1", "Jornada de plantación", "Con Con", "15-03-2026", 5, "NORMAL");
         p1.agregarEvento("E2", "Respuesta a incendio forestal", "Quillota", "20-03-2026", 3, "CATASTROFE");
 
-        gestor.registrarVoluntario("Ana Pérez", "11.111.111-1", "Valparaíso", true);
-        gestor.registrarVoluntario("Juan Soto", "22.222.222-2", "Quillota", true);
-        gestor.registrarVoluntario("María Vidal", "33.333.333-3", "Con Con", true);
+        gestor.registrarVoluntario("Ana Pérez", "11111111-1", "Valparaíso", true);
+        gestor.registrarVoluntario("Juan Soto", "22222222-2", "Quillota", true);
+        gestor.registrarVoluntario("María Vidal", "33333333-3", "Con Con", true);
 
-        gestor.buscarVoluntario("11.111.111-1").agregarHabilidad("Primeros auxilios");
-        gestor.buscarVoluntario("22.222.222-2").agregarHabilidad("Primeros auxilios");
-        gestor.buscarVoluntario("33.333.333-3").agregarHabilidad("Logística");
+        gestor.buscarVoluntario("11111111-1").agregarHabilidad("Primeros auxilios");
+        gestor.buscarVoluntario("22222222-2").agregarHabilidad("Primeros auxilios");
+        gestor.buscarVoluntario("33333333-3").agregarHabilidad("Logística");
     }
 }

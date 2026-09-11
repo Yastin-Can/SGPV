@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
-import sgpv.modelo.Prioridad;
-import sgpv.modelo.Voluntario;
 import sgpv.utils.StringUtils;
 
 /** Representa una actividad perteneciente a un programa de voluntariado. */
@@ -160,15 +158,15 @@ public class Evento {
     }
     
     public Voluntario buscarVoluntario(String rut) {
-        if (rut == null) return null;
-        
+        if (!Voluntario.tieneRutValido(rut)) return null;
+
         for(int i = 0; i < voluntariosAsignados.size(); i++) {
             Voluntario vol = (Voluntario) voluntariosAsignados.get(i);
             if(vol.getRut().equals(rut)) {
                 return vol;
             }
         }
-        
+
         return null;
     }
     
