@@ -140,7 +140,7 @@ public class Main {
         String id = vista.pedirTexto("ID del programa");
         String titulo = vista.pedirTexto("Título");
         String descripcion = vista.pedirTexto("Descripción");
-        String fecha = vista.pedirTexto("Fecha de inicio (DD-MM-AAAA)");
+        String fecha = vista.pedirFecha("Fecha de inicio");
 
         boolean ok = gestor.agregarPrograma(id, titulo, descripcion, fecha);
         if (ok) {
@@ -167,7 +167,7 @@ public class Main {
         }
         String titulo = vista.pedirTexto("Nuevo título");
         String descripcion = vista.pedirTexto("Nueva descripción");
-        String fecha = vista.pedirTexto("Nueva fecha de inicio");
+        String fecha = vista.pedirFecha("Nueva fecha de inicio");
 
         boolean ok = gestor.editarPrograma(id, titulo, descripcion, fecha);
         vista.mostrarMensaje(ok ? "Programa actualizado." : "No se pudo actualizar el programa.");
@@ -236,7 +236,7 @@ public class Main {
         String idEvento = vista.pedirTexto("ID del evento");
         String nombre = vista.pedirTexto("Nombre");
         String lugar = vista.pedirTexto("Lugar");
-        String fecha = vista.pedirTexto("Fecha (DD-MM-AAAA)");
+        String fecha = vista.pedirFecha("Fecha");
         int cupos = vista.pedirEntero("Cupos", 0, Integer.MAX_VALUE);
         String prioridad = pedirPrioridad(vista);
 
@@ -276,8 +276,16 @@ public class Main {
 
         evento.setNombre(vista.pedirTexto("Nuevo nombre"));
         evento.setLugar(vista.pedirTexto("Nuevo lugar"));
-        evento.setFecha(vista.pedirTexto("Nueva fecha"));
-        evento.setCupos(vista.pedirEntero("Nuevos cupos", 0, Integer.MAX_VALUE));
+        evento.setFecha(vista.pedirFecha("Nueva fecha"));
+
+        int nuevosCupos = vista.pedirEntero("Nuevos cupos", 0, Integer.MAX_VALUE);
+        try {
+            evento.setCupos(nuevosCupos);
+        } catch (IllegalArgumentException | CupoLlenoException e) {
+            vista.mostrarError(e.getMessage());
+            return;
+        }
+
         evento.setPrioridad(sgpv.modelo.Prioridad.valueOf(pedirPrioridad(vista)));
 
         vista.mostrarMensaje("Evento actualizado.");
@@ -349,7 +357,7 @@ public class Main {
 
     private static void registrarVoluntario(Vista vista, GestorVoluntariado gestor) {
         String nombre = vista.pedirTexto("Nombre");
-        String rut = vista.pedirTexto("RUT");
+        String rut = vista.pedirRut("RUT");
         String comuna = vista.pedirTexto("Comuna");
         boolean disponible = vista.pedirBooleano("¿Está disponible?");
 
@@ -385,8 +393,16 @@ public class Main {
         String comuna = vista.pedirTexto("Nueva comuna");
         boolean disponible = vista.pedirBooleano("¿Está disponible?");
 
-        boolean ok = gestor.editarVoluntario(rut, nombre, comuna, disponible);
-        vista.mostrarMensaje(ok ? "Voluntario actualizado." : "No se pudo actualizar.");
+        try {
+            boolean ok = gestor.editarVoluntario(rut, nombre, comuna, disponible);
+            if (ok) {
+                vista.mostrarMensaje("Voluntario actualizado.");
+            } else {
+                vista.mostrarError("No se pudo actualizar.");
+            }
+        } catch (VoluntarioNoDisponibleException e) {
+            vista.mostrarError(e.getMessage());
+        }
     }
 
     private static void eliminarVoluntario(Vista vista, GestorVoluntariado gestor) {

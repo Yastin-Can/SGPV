@@ -101,10 +101,13 @@ public class Evento {
         this.lugar = lugar;
     }
 
-    public void setCupos(int cupos) {
-        if (cupos < 0 || cupos < voluntariosAsignados.size()) {
-            throw new IllegalArgumentException(
-                    "Los cupos no pueden ser negativos ni menores a los voluntarios ya asignados");
+    public void setCupos(int cupos) throws CupoLlenoException {
+        if (cupos < 0) {
+            throw new IllegalArgumentException("Los cupos no pueden ser negativos");
+        }
+        if (cupos < voluntariosAsignados.size()) {
+            throw new CupoLlenoException("No se puede reducir el cupo a " + cupos
+                    + ": ya hay " + voluntariosAsignados.size() + " voluntario(s) asignado(s) a este evento.");
         }
         this.cupos = cupos;
     }

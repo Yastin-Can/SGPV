@@ -60,7 +60,20 @@ public class GestorVoluntariado {
 
     public boolean eliminarPrograma(String idPrograma) {
         if (idPrograma == null) return false;
-        return programas.remove(idPrograma) != null;
+        Programa programa = programas.get(idPrograma);
+        if (programa == null) return false;
+
+        // Antes de borrar el programa, se liberan los voluntarios que tenian
+        // asignado alguno de sus eventos; de lo contrario quedarian marcados
+        // como no disponibles para siempre, sin ningun evento real que los ocupe.
+        for (Evento evento : programa.getEventos().values()) {
+            for (Voluntario v : evento.getVoluntariosAsignados()) {
+                v.setDisponible(true);
+            }
+        }
+
+        programas.remove(idPrograma);
+        return true;
     }
 
     public Programa buscarPrograma(String idPrograma) {
@@ -91,13 +104,23 @@ public class GestorVoluntariado {
         if (StringUtils.isBlank(rut) || voluntariosRegistrados.containsKey(rut)) {
             return false;
         }
-        Voluntario nuevo = new Voluntario(nombre, rut, comuna, disponible);
-        return registrarVoluntario(nuevo);
+        try {
+            Voluntario nuevo = new Voluntario(nombre, rut, comuna, disponible);
+            return registrarVoluntario(nuevo);
+        } catch (IllegalArgumentException e) {
+            System.err.println("No se pudo registrar el voluntario \"" + rut + "\": " + e.getMessage());
+            return false;
+        }
     }
 
-    public boolean editarVoluntario(String rut, String nuevoNombre, String nuevaComuna, boolean disponible) {
+    public boolean editarVoluntario(String rut, String nuevoNombre, String nuevaComuna, boolean disponible)
+            throws VoluntarioNoDisponibleException {
         Voluntario v = voluntariosRegistrados.get(rut);
         if (v == null) return false;
+        if (disponible && estaAsignadoAAlgunEvento(v)) {
+            throw new VoluntarioNoDisponibleException(
+                    "El voluntario sigue asignado a un evento; no puede marcarse disponible hasta que se le quite esa asignación.");
+        }
         v.setNombre(nuevoNombre);
         v.setComuna(nuevaComuna);
         v.setDisponible(disponible);
@@ -106,7 +129,17 @@ public class GestorVoluntariado {
 
     public boolean eliminarVoluntario(String rut) {
         if (rut == null) return false;
-        return voluntariosRegistrados.remove(rut) != null;
+        Voluntario v = voluntariosRegistrados.get(rut);
+        if (v == null) return false;
+
+        for (Programa p : programas.values()) {
+            for (Evento e : p.getEventos().values()) {
+                e.getVoluntariosAsignados().remove(v);
+            }
+        }
+
+        voluntariosRegistrados.remove(rut);
+        return true;
     }
 
     public Voluntario buscarVoluntario(String rut) {
@@ -123,11 +156,19 @@ public class GestorVoluntariado {
     }
 
 
-    /**
-     * Busca, entre los voluntarios registrados, los q están disponibles
-     * y poseen la habilidad indicada.
-     *
-     */
+    private boolean estaAsignadoAAlgunEvento(Voluntario v) {
+        for (Programa p : programas.values()) {
+            for (Evento e : p.getEventos().values()) {
+                if (e.getVoluntariosAsignados().contains(v)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
     public List<Voluntario> listarVoluntariosDisponiblesPorHabilidad(String nombreHabilidad) {
         List<Voluntario> resultado = new ArrayList<>();
         if (StringUtils.isBlank(nombreHabilidad)) return resultado;
@@ -140,14 +181,7 @@ public class GestorVoluntariado {
         return resultado;
     }
 
-    /**
-     * Ante un evento (catastrofe) toma del registro global el subconjunto de
-     * voluntarios disponibles que posean la habilidad requerida y los asigna
-     * automáticamente al evento hasta llenar sus cupos disponibles.
-     *
-     *
-     * Devuelve la lista de voluntarios q fueron asignados
-     */
+
     public List<Voluntario> asignarVoluntariosDisponiblesAEvento(String idPrograma, String idEvento,
             String nombreHabilidad) throws CupoLlenoException, VoluntarioNoDisponibleException {
 

@@ -52,7 +52,7 @@ public class Voluntario {
         return disponible;
     }
 
-    /** Nombre alternativo requerido por las clases que consumen este modelo. */
+
     public boolean isDisponibilidad() {
         return disponible;
     }

@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -53,11 +55,17 @@ public class PersistenciaExcel {
             header.createCell(i).setCellValue(columnas[i]);
         }
 
+
+        CellStyle estiloTexto = wb.createCellStyle();
+        estiloTexto.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("@"));
+
         int numeroFila = 1;
         for (Voluntario v : gestor.listarVoluntarios()) {
             Row fila = hoja.createRow(numeroFila++);
             fila.createCell(0).setCellValue(v.getNombre());
-            fila.createCell(1).setCellValue(v.getRut());
+            Cell celdaRut = fila.createCell(1);
+            celdaRut.setCellStyle(estiloTexto);
+            celdaRut.setCellValue(v.getRut());
             fila.createCell(2).setCellValue(v.getComuna());
             fila.createCell(3).setCellValue(v.isDisponible());
 
@@ -227,16 +235,12 @@ public class PersistenciaExcel {
 
     // Lectura
 
+    private static final DataFormatter FORMATO = new DataFormatter();
+
     private static String leerTexto(Row fila, int indice) {
         Cell celda = fila.getCell(indice);
         if (celda == null) return "";
-        if (celda.getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
-            return String.valueOf((long) celda.getNumericCellValue());
-        }
-        if (celda.getCellType() == org.apache.poi.ss.usermodel.CellType.BOOLEAN) {
-            return String.valueOf(celda.getBooleanCellValue());
-        }
-        return celda.getStringCellValue() == null ? "" : celda.getStringCellValue().trim();
+        return FORMATO.formatCellValue(celda).trim();
     }
 
     private static boolean leerBooleano(Row fila, int indice) {

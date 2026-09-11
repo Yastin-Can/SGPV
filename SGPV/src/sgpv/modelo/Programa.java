@@ -36,7 +36,6 @@ public class Programa {
 
     // CRUD sobre la colección de eventos
 
-    // Recibe un objeto "Evento" ya instanciado
     public boolean agregarEvento(Evento evento){
         if(evento == null || evento.getIdEvento() == null || eventos.containsKey(evento.getIdEvento())){
             return false;
@@ -45,9 +44,7 @@ public class Programa {
         return true;
     }
 
-    // Recibe los datos sueltos y crea el Evento internamente, esto cumple con ser una sobrecarga.
-    // El constructor de Evento valida sus datos y puede lanzar IllegalArgumentException;
-    // la capturamos acá para mantener el contrato del método (SIA-12: manejo vía try-catch).
+
     public boolean agregarEvento(String idEvento, String nombre, String lugar, String fecha, int cupos, String prioridad){
         if(idEvento == null || eventos.containsKey(idEvento)){
             return false;
@@ -61,10 +58,17 @@ public class Programa {
         }
     }
 
-    // Elimina un evento del programa por id. Devuelve true si existía y fue removido.
     public boolean eliminarEvento(String idEvento){
         if(idEvento == null) return false;
-        return eventos.remove(idEvento) != null;
+        Evento evento = eventos.get(idEvento);
+        if(evento == null) return false;
+
+        for(Voluntario v : evento.getVoluntariosAsignados()){
+            v.setDisponible(true);
+        }
+
+        eventos.remove(idEvento);
+        return true;
     }
 
     // Obtiene un evento puntual por id, sin necesidad de copiar todo el mapa
@@ -81,8 +85,7 @@ public class Programa {
         return eventos.size();
     }
 
-    // Funcionalidad propia de negocio
-    // Filtrado de eventos por criterio, distinto de CRUD/reportes
+
 
     // Devuelve el subconjunto de eventos que todavía tienen cupos disponibles
     public List<Evento> listarEventosConCuposDisponibles(){

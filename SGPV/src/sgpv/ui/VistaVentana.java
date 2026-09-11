@@ -4,9 +4,9 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
- * Presentación y entrada mediante ventanas reales de swing.
- * Cada mensaje, lista, o dato pedido al usuario aparece en una ventana
- * emergente propia del Netbeans.
+ * Presentacion y entrada mediante ventanas reales de swing.
+ * Cada mensaje, lista, o dato pedido al usuario aparece en una ventana emergente
+ * 
  */
 public class VistaVentana implements Vista {
 
