@@ -139,12 +139,12 @@ public class Evento {
         if (voluntariosAsignados.contains(voluntario)) {
             return;
         }
-        if (voluntariosAsignados.size() >= cupos) {
-            throw new CupoLlenoException("No quedan cupos disponibles en el evento");
-        }
         if (voluntario == null || !voluntario.isDisponible()) {
             throw new VoluntarioNoDisponibleException(
                     "El voluntario no se encuentra disponible");
+        }
+        if (voluntariosAsignados.size() >= cupos) {
+            throw new CupoLlenoException("No quedan cupos disponibles en el evento");
         }
         voluntariosAsignados.add(voluntario);
         voluntario.setDisponible(false);
@@ -165,7 +165,7 @@ public class Evento {
 
         for(int i = 0; i < voluntariosAsignados.size(); i++) {
             Voluntario vol = (Voluntario) voluntariosAsignados.get(i);
-            if(vol.getRut().equals(rut)) {
+            if(vol.getRut().equalsIgnoreCase(rut)) {
                 return vol;
             }
         }
@@ -178,6 +178,7 @@ public class Evento {
             String comuna, boolean disponible) {
         Voluntario vol = (Voluntario) buscarVoluntario(rut);
         if (vol == null) return false;
+        if (disponible) return false;
 
         vol.setNombre(nombre);
         vol.setComuna(comuna);

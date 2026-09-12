@@ -10,7 +10,7 @@ public final class StringUtils{
     /**
      * Verifica si un texto es nulo, está vacío o contiene únicamente espacios en blanco.
      * 
-     * @_param str la cadena de texto a evaluar
+     * @param str la cadena de texto a evaluar
      * @return true si el texto es nulo, vacio o tiene solo espacios, false en caso contrario.
      */
     public static boolean isBlank(String str) {
