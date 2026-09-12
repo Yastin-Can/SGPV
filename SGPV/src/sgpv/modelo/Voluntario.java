@@ -28,7 +28,9 @@ public class Voluntario {
     public Voluntario(String nombre, String rut, String comuna, boolean disponible, List<Habilidad> habilidades) {
         this(nombre, rut, comuna, disponible);
         if (habilidades != null) {
-            this.habilidades.addAll(habilidades);
+            for (Habilidad habilidad : habilidades) {
+                agregarHabilidad(habilidad);
+            }
         }
     }
     
@@ -70,7 +72,7 @@ public class Voluntario {
             throw new IllegalArgumentException("El rut debe tener el formato 11111111-1");
         }
 
-        this.rut = rut;
+        this.rut = rut.toUpperCase();
     }
     
     public void setDisponible(boolean disponible) {
@@ -78,9 +80,13 @@ public class Voluntario {
     }
     
     public void setHabilidades(ArrayList<Habilidad> habilidades) {
-        this.habilidades = habilidades == null
+        ArrayList<Habilidad> habilidadesRecibidas = habilidades == null
                 ? new ArrayList<>()
                 : new ArrayList<>(habilidades);
+        this.habilidades = new ArrayList<>();
+        for (Habilidad habilidad : habilidadesRecibidas) {
+            agregarHabilidad(habilidad);
+        }
     }
 
     public void setComuna(String comuna) {
@@ -203,7 +209,7 @@ public class Voluntario {
     }
     
     public static boolean tieneRutValido(String rut) {
-        return rut != null && rut.matches("[0-9]{7,8}-[0-9K]");
+        return rut != null && rut.matches("[0-9]{7,8}-[0-9Kk]");
     }
 
     @Override

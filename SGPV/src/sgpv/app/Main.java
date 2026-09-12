@@ -274,11 +274,12 @@ public class Main {
             return;
         }
 
-        evento.setNombre(vista.pedirTexto("Nuevo nombre"));
-        evento.setLugar(vista.pedirTexto("Nuevo lugar"));
-        evento.setFecha(vista.pedirFecha("Nueva fecha"));
+        String nuevoNombre = vista.pedirTexto("Nuevo nombre");
+        String nuevoLugar = vista.pedirTexto("Nuevo lugar");
+        String nuevaFecha = vista.pedirFecha("Nueva fecha");
 
         int nuevosCupos = vista.pedirEntero("Nuevos cupos", 0, Integer.MAX_VALUE);
+        sgpv.modelo.Prioridad nuevaPrioridad = sgpv.modelo.Prioridad.valueOf(pedirPrioridad(vista));
         try {
             evento.setCupos(nuevosCupos);
         } catch (IllegalArgumentException | CupoLlenoException e) {
@@ -286,7 +287,10 @@ public class Main {
             return;
         }
 
-        evento.setPrioridad(sgpv.modelo.Prioridad.valueOf(pedirPrioridad(vista)));
+        evento.setNombre(nuevoNombre);
+        evento.setLugar(nuevoLugar);
+        evento.setFecha(nuevaFecha);
+        evento.setPrioridad(nuevaPrioridad);
 
         vista.mostrarMensaje("Evento actualizado.");
     }
