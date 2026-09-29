@@ -2,6 +2,7 @@ package sgpv.ui;
 
 import java.util.List;
 import javax.swing.JOptionPane;
+import sgpv.excepciones.OperacionCanceladaException;
 
 /**
  * Presentacion y entrada mediante ventanas reales de swing.
@@ -54,7 +55,10 @@ public class VistaVentana implements Vista {
     @Override
     public String pedirTexto(String etiqueta) {
         String respuesta = JOptionPane.showInputDialog(null, etiqueta, tituloActual, JOptionPane.QUESTION_MESSAGE);
-        return respuesta == null ? "" : respuesta.trim();
+        if (respuesta == null) {
+            throw new OperacionCanceladaException();
+        }
+        return respuesta.trim();
     }
 
     @Override
@@ -63,7 +67,7 @@ public class VistaVentana implements Vista {
             String respuesta = JOptionPane.showInputDialog(null,
                     etiqueta + " (" + min + " a " + max + ")", tituloActual, JOptionPane.QUESTION_MESSAGE);
             if (respuesta == null) {
-                continue; // el usuario canceló; para un dato obligatorio, se vuelve a pedir
+                throw new OperacionCanceladaException();
             }
             try {
                 int valor = Integer.parseInt(respuesta.trim());
@@ -82,11 +86,9 @@ public class VistaVentana implements Vista {
 
     @Override
     public boolean pedirBooleano(String etiqueta) {
-        while (true) {
-            int respuesta = JOptionPane.showConfirmDialog(null, etiqueta, tituloActual, JOptionPane.YES_NO_OPTION);
-            if (respuesta == JOptionPane.YES_OPTION) return true;
-            if (respuesta == JOptionPane.NO_OPTION) return false;
-            // si cierra la ventana sin elegir, se vuelve a preguntar
-        }
+        int respuesta = JOptionPane.showConfirmDialog(null, etiqueta, tituloActual, JOptionPane.YES_NO_OPTION);
+        if (respuesta == JOptionPane.YES_OPTION) return true;
+        if (respuesta == JOptionPane.NO_OPTION) return false;
+        throw new OperacionCanceladaException();
     }
 }

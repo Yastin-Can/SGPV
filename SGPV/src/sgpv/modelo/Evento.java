@@ -6,7 +6,10 @@ import sgpv.excepciones.CupoLlenoException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
 import sgpv.utils.StringUtils;
 
-/** Representa una actividad perteneciente a un programa de voluntariado. */
+/**
+ * Representa una actividad perteneciente a un programa de voluntariado.
+ * Es la clase padre de EventoEmergencia y EventoCapacitacion.
+ */
 public class Evento {
     private String idEvento;
     private String nombre;
@@ -125,13 +128,21 @@ public class Evento {
     }
 
     public ArrayList<Voluntario> getVoluntariosAsignados() {
-        return voluntariosAsignados;
+        return new ArrayList<>(voluntariosAsignados);
     }
 
     public void setVoluntariosAsignados(List<Voluntario> voluntariosAsignados) {
         this.voluntariosAsignados = voluntariosAsignados == null
                 ? new ArrayList<>()
                 : new ArrayList<>(voluntariosAsignados);
+    }
+
+    public String getTipo() {
+        return "REGULAR";
+    }
+
+    public String getHabilidadAsociada() {
+        return "";
     }
 
     public void asignarVoluntario(Voluntario voluntario)
@@ -174,18 +185,6 @@ public class Evento {
     }
     
     
-    public boolean modificarVoluntario(String rut, String nombre,
-            String comuna, boolean disponible) {
-        Voluntario vol = (Voluntario) buscarVoluntario(rut);
-        if (vol == null) return false;
-        if (disponible) return false;
-
-        vol.setNombre(nombre);
-        vol.setComuna(comuna);
-        vol.setDisponible(disponible);
-        return true;
-    }
-    
     public boolean eliminarVoluntario(String rut) {
         Voluntario vol = (Voluntario) buscarVoluntario(rut);
         if (vol == null) return false;
@@ -195,16 +194,6 @@ public class Evento {
             vol.setDisponible(true);
         }
         return eliminado;
-    }
-    
-    public void mostrarVoluntarios() {
-        if(voluntariosAsignados == null) return;
-        if(voluntariosAsignados.size() == 0) return;
-        
-        for(int i = 0; i < voluntariosAsignados.size(); i++) {
-            Voluntario vol = (Voluntario) voluntariosAsignados.get(i);
-            System.out.println("V" + (i + 1) + " rut: " + vol.getRut() + ", nombre: " + vol.getNombre() + ", comuna: " + vol.getComuna());
-        }
     }
     
     @Override

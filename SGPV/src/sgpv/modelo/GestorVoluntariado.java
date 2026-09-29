@@ -1,7 +1,7 @@
 package sgpv.modelo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import sgpv.modelo.Evento;
@@ -21,8 +21,8 @@ public class GestorVoluntariado {
     private Map<String, Voluntario> voluntariosRegistrados;
 
     public GestorVoluntariado() {
-        this.programas = new HashMap<>();
-        this.voluntariosRegistrados = new HashMap<>();
+        this.programas = new LinkedHashMap<>();
+        this.voluntariosRegistrados = new LinkedHashMap<>();
     }
 
     // CRUD: Programas 
@@ -101,7 +101,7 @@ public class GestorVoluntariado {
     }
 
     public boolean registrarVoluntario(String nombre, String rut, String comuna, boolean disponible) {
-        if (StringUtils.isBlank(rut) || voluntariosRegistrados.containsKey(rut)) {
+        if (StringUtils.isBlank(rut) || voluntariosRegistrados.containsKey(claveRut(rut))) {
             return false;
         }
         try {
@@ -115,7 +115,7 @@ public class GestorVoluntariado {
 
     public boolean editarVoluntario(String rut, String nuevoNombre, String nuevaComuna, boolean disponible)
             throws VoluntarioNoDisponibleException {
-        Voluntario v = voluntariosRegistrados.get(rut);
+        Voluntario v = buscarVoluntario(rut);
         if (v == null) return false;
         if (disponible && estaAsignadoAAlgunEvento(v)) {
             throw new VoluntarioNoDisponibleException(
@@ -128,23 +128,26 @@ public class GestorVoluntariado {
     }
 
     public boolean eliminarVoluntario(String rut) {
-        if (rut == null) return false;
-        Voluntario v = voluntariosRegistrados.get(rut);
+        Voluntario v = buscarVoluntario(rut);
         if (v == null) return false;
 
         for (Programa p : programas.values()) {
             for (Evento e : p.getEventos().values()) {
-                e.getVoluntariosAsignados().remove(v);
+                e.eliminarVoluntario(v.getRut());
             }
         }
 
-        voluntariosRegistrados.remove(rut);
+        voluntariosRegistrados.remove(v.getRut());
         return true;
     }
 
     public Voluntario buscarVoluntario(String rut) {
         if (rut == null) return null;
-        return voluntariosRegistrados.get(rut);
+        return voluntariosRegistrados.get(claveRut(rut));
+    }
+
+    private static String claveRut(String rut) {
+        return rut.trim().toUpperCase();
     }
 
     public List<Voluntario> listarVoluntarios() {
@@ -199,8 +202,12 @@ public class GestorVoluntariado {
             if (evento.getCuposDisponibles() <= 0) {
                 break;
             }
-            evento.asignarVoluntario(candidato);
-            asignados.add(candidato);
+            try {
+                evento.asignarVoluntario(candidato);
+                asignados.add(candidato);
+            } catch (VoluntarioNoDisponibleException e) {
+                continue;
+            }
         }
         return asignados;
     }

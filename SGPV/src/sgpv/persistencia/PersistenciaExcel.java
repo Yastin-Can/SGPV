@@ -89,7 +89,7 @@ public class PersistenciaExcel {
         Sheet hojaEventos = wb.createSheet(HOJA_EVENTOS);
         Row headerEventos = hojaEventos.createRow(0);
         String[] colsEventos = {"idPrograma", "idEvento", "nombre", "lugar", "comuna",
-                "fecha", "cupos", "prioridad", "rutsVoluntariosAsignados"};
+                "fecha", "cupos", "prioridad", "rutsVoluntariosAsignados", "tipo", "habilidad"};
         for (int i = 0; i < colsEventos.length; i++) {
             headerEventos.createCell(i).setCellValue(colsEventos[i]);
         }
@@ -120,6 +120,8 @@ public class PersistenciaExcel {
                     ruts.append(v.getRut());
                 }
                 fe.createCell(8).setCellValue(ruts.toString());
+                fe.createCell(9).setCellValue(e.getTipo());
+                fe.createCell(10).setCellValue(e.getHabilidadAsociada());
             }
         }
     }
@@ -135,6 +137,9 @@ public class PersistenciaExcel {
             cargarVoluntarios(wb, gestor);
             cargarProgramas(wb, gestor);
             cargarEventos(wb, gestor);
+        } catch (RuntimeException e) {
+            // POI lanza RuntimeException si el archivo esta vacio o corrupto
+            throw new IOException("el archivo está vacío o no es un Excel válido", e);
         }
         return gestor;
     }
@@ -210,23 +215,27 @@ public class PersistenciaExcel {
             int cupos = (int) leerNumero(fila, 6);
             String prioridad = leerTexto(fila, 7);
             String rutsTexto = leerTexto(fila, 8);
+            // archivos antiguos no tienen estas columnas, quedan como REGULAR
+            String tipo = leerTexto(fila, 9);
+            String habilidad = leerTexto(fila, 10);
 
-            boolean creado = programa.agregarEvento(idEvento, nombre, lugar, fecha, cupos, prioridad);
+            boolean creado = programa.agregarEvento(idEvento, nombre, lugar, comuna, fecha,
+                    cupos, prioridad, tipo, habilidad);
             if (!creado) continue;
 
             Evento evento = programa.getEvento(idEvento);
-            evento.setComuna(comuna);
 
             if (!StringUtils.isBlank(rutsTexto)) {
                 for (String rut : rutsTexto.split(",")) {
                     if (StringUtils.isBlank(rut)) continue;
                     Voluntario v = gestor.buscarVoluntario(rut.trim());
-                    // Se restaura la asignación tal cual fue guardada; el voluntario
-                    // ya quedó marcado como no disponible al cargarlo (SIA-11: batch),
-                    // así que se agrega directamente en vez de repetir la validación
-                    // de negocio que usa asignarVoluntario() para asignaciones nuevas.
-                    if (v != null) {
-                        evento.getVoluntariosAsignados().add(v);
+                    if (v == null) continue;
+                    v.setDisponible(true);
+                    try {
+                        evento.asignarVoluntario(v);
+                    } catch (CupoLlenoException | VoluntarioNoDisponibleException ex) {
+                        System.err.println("Asignación omitida al cargar (" + rut + " en "
+                                + idEvento + "): " + ex.getMessage());
                     }
                 }
             }
