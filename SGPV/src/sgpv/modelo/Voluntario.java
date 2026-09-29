@@ -42,10 +42,6 @@ public class Voluntario {
         return rut;
     }
     
-    public boolean getDisp() {
-        return disponible;
-    }
-    
     public String getComuna() {
         return comuna;
     }
@@ -53,14 +49,9 @@ public class Voluntario {
     public boolean isDisponible() {
         return disponible;
     }
-
-
-    public boolean isDisponibilidad() {
-        return disponible;
-    }
     
     public ArrayList<Habilidad> getHabilidades() {
-        return habilidades;
+        return new ArrayList<>(habilidades);
     }
     
     public void setNombre(String nombre) {
@@ -167,17 +158,6 @@ public class Voluntario {
         return false;
     }
     
-    public void mostrarHabilidades() {
-        if (habilidades.isEmpty()) {
-            System.out.println("Sin habilidades registradas");
-            return;
-        }
-        for (int i = 0; i < habilidades.size(); i++) {
-            Habilidad habilidad = (Habilidad) habilidades.get(i);
-            System.out.println("H" + (i + 1) + ": " + habilidad);
-        }
-    }
-
     @Override
     public boolean equals(Object objeto) {
         if (this == objeto) {

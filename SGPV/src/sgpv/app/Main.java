@@ -6,9 +6,11 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import sgpv.modelo.Evento;
 import sgpv.excepciones.CupoLlenoException;
+import sgpv.excepciones.OperacionCanceladaException;
 import sgpv.excepciones.VoluntarioNoDisponibleException;
 import sgpv.modelo.Habilidad;
 import sgpv.modelo.GestorVoluntariado;
+import sgpv.modelo.Prioridad;
 import sgpv.modelo.Programa;
 import sgpv.persistencia.PersistenciaExcel;
 import sgpv.ui.Vista;
@@ -24,6 +26,7 @@ public class Main {
 
     private static final String RUTA_EXCEL = "sgpv_datos.xlsx";
     private static final List<String> PRIORIDADES = Arrays.asList("BAJA", "NORMAL", "ALTA", "CATASTROFE");
+    private static final List<String> TIPOS_EVENTO = Arrays.asList("REGULAR", "EMERGENCIA", "CAPACITACION");
 
     public static void main(String[] args) {
         Vista vista = elegirModo();
@@ -39,24 +42,28 @@ public class Main {
                     "Asignar voluntarios disponibles a un evento"
             ));
 
-            switch (opcion) {
-                case 0:
-                    menuProgramas(vista, gestor);
-                    break;
-                case 1:
-                    menuEventos(vista, gestor);
-                    break;
-                case 2:
-                    menuVoluntarios(vista, gestor);
-                    break;
-                case 3:
-                    asignacionEspecial(vista, gestor);
-                    break;
-                case -1:
-                    salir = true;
-                    break;
-                default:
-                    vista.mostrarError("Opción inválida.");
+            try {
+                switch (opcion) {
+                    case 0:
+                        menuProgramas(vista, gestor);
+                        break;
+                    case 1:
+                        menuEventos(vista, gestor);
+                        break;
+                    case 2:
+                        menuVoluntarios(vista, gestor);
+                        break;
+                    case 3:
+                        asignacionEspecial(vista, gestor);
+                        break;
+                    case -1:
+                        salir = true;
+                        break;
+                    default:
+                        vista.mostrarError("Opción inválida.");
+                }
+            } catch (OperacionCanceladaException e) {
+                vista.mostrarMensaje(e.getMessage());
             }
         }
         guardarEstadoFinal(vista, gestor);
@@ -111,27 +118,31 @@ public class Main {
                     "Eliminar programa", "Buscar programa"
             ));
 
-            switch (opcion) {
-                case 0:
-                    agregarPrograma(vista, gestor);
-                    break;
-                case 1:
-                    listarProgramas(vista, gestor);
-                    break;
-                case 2:
-                    editarPrograma(vista, gestor);
-                    break;
-                case 3:
-                    eliminarPrograma(vista, gestor);
-                    break;
-                case 4:
-                    buscarPrograma(vista, gestor);
-                    break;
-                case -1:
-                    volver = true;
-                    break;
-                default:
-                    vista.mostrarError("Opción inválida.");
+            try {
+                switch (opcion) {
+                    case 0:
+                        agregarPrograma(vista, gestor);
+                        break;
+                    case 1:
+                        listarProgramas(vista, gestor);
+                        break;
+                    case 2:
+                        editarPrograma(vista, gestor);
+                        break;
+                    case 3:
+                        eliminarPrograma(vista, gestor);
+                        break;
+                    case 4:
+                        buscarPrograma(vista, gestor);
+                        break;
+                    case -1:
+                        volver = true;
+                        break;
+                    default:
+                        vista.mostrarError("Opción inválida.");
+                }
+            } catch (OperacionCanceladaException e) {
+                vista.mostrarMensaje(e.getMessage());
             }
         }
     }
@@ -155,7 +166,7 @@ public class Main {
         for (Programa p : gestor.listarProgramas()) {
             lineas.add(p.toString());
         }
-        vista.mostrarTitulo("Listado de Programas");
+        vista.mostrarTitulo("Listado de Programas (" + gestor.getCantidadProgramas() + ")");
         vista.mostrarLista(lineas);
     }
 
@@ -197,30 +208,41 @@ public class Main {
             vista.mostrarTitulo("Gestión de Eventos");
             int opcion = vista.pedirOpcion(Arrays.asList(
                     "Agregar evento a un programa", "Listar eventos de un programa",
-                    "Editar evento", "Eliminar evento", "Buscar evento"
+                    "Editar evento", "Eliminar evento", "Buscar evento",
+                    "Eventos con cupos disponibles", "Eventos por prioridad"
             ));
 
-            switch (opcion) {
-                case 0:
-                    agregarEvento(vista, gestor);
-                    break;
-                case 1:
-                    listarEventos(vista, gestor);
-                    break;
-                case 2:
-                    editarEvento(vista, gestor);
-                    break;
-                case 3:
-                    eliminarEvento(vista, gestor);
-                    break;
-                case 4:
-                    buscarEvento(vista, gestor);
-                    break;
-                case -1:
-                    volver = true;
-                    break;
-                default:
-                    vista.mostrarError("Opción inválida.");
+            try {
+                switch (opcion) {
+                    case 0:
+                        agregarEvento(vista, gestor);
+                        break;
+                    case 1:
+                        listarEventos(vista, gestor);
+                        break;
+                    case 2:
+                        editarEvento(vista, gestor);
+                        break;
+                    case 3:
+                        eliminarEvento(vista, gestor);
+                        break;
+                    case 4:
+                        buscarEvento(vista, gestor);
+                        break;
+                    case 5:
+                        eventosConCupos(vista, gestor);
+                        break;
+                    case 6:
+                        eventosPorPrioridad(vista, gestor);
+                        break;
+                    case -1:
+                        volver = true;
+                        break;
+                    default:
+                        vista.mostrarError("Opción inválida.");
+                }
+            } catch (OperacionCanceladaException e) {
+                vista.mostrarMensaje(e.getMessage());
             }
         }
     }
@@ -238,11 +260,20 @@ public class Main {
         String lugar = vista.pedirTexto("Lugar");
         String fecha = vista.pedirFecha("Fecha");
         int cupos = vista.pedirEntero("Cupos", 0, Integer.MAX_VALUE);
+        String tipo = pedirTipoEvento(vista);
         String prioridad = pedirPrioridad(vista);
+        vista.mostrarTitulo("Gestión de Eventos");
+        String habilidad = "";
+        if (tipo.equals("EMERGENCIA")) {
+            habilidad = vista.pedirTexto("Habilidad requerida para la emergencia");
+        } else if (tipo.equals("CAPACITACION")) {
+            habilidad = vista.pedirTexto("Habilidad que enseña la capacitación");
+        }
 
-        boolean ok = programa.agregarEvento(idEvento, nombre, lugar, fecha, cupos, prioridad);
+        boolean ok = programa.agregarEvento(idEvento, nombre, lugar, "", fecha, cupos, prioridad, tipo, habilidad);
         vista.mostrarMensaje(ok ? "Evento agregado correctamente."
-                : "No se pudo agregar el evento (ID repetido o datos inválidos).");
+                : "No se pudo agregar el evento (ID repetido o datos inválidos; una emergencia"
+                + " debe tener prioridad ALTA o CATASTROFE y una habilidad).");
     }
 
     private static void listarEventos(Vista vista, GestorVoluntariado gestor) {
@@ -256,7 +287,7 @@ public class Main {
         for (Evento e : programa.getEventos().values()) {
             lineas.add(e.toString());
         }
-        vista.mostrarTitulo("Eventos del programa " + idPrograma);
+        vista.mostrarTitulo("Eventos del programa " + idPrograma + " (" + programa.getCantidadEventos() + ")");
         vista.mostrarLista(lineas);
     }
 
@@ -279,10 +310,14 @@ public class Main {
         String nuevaFecha = vista.pedirFecha("Nueva fecha");
 
         int nuevosCupos = vista.pedirEntero("Nuevos cupos", 0, Integer.MAX_VALUE);
-        sgpv.modelo.Prioridad nuevaPrioridad = sgpv.modelo.Prioridad.valueOf(pedirPrioridad(vista));
+        Prioridad nuevaPrioridad = Prioridad.valueOf(pedirPrioridad(vista));
+        vista.mostrarTitulo("Gestión de Eventos");
+        Prioridad prioridadAnterior = evento.getPrioridad();
         try {
+            evento.setPrioridad(nuevaPrioridad);
             evento.setCupos(nuevosCupos);
         } catch (IllegalArgumentException | CupoLlenoException e) {
+            evento.setPrioridad(prioridadAnterior);
             vista.mostrarError(e.getMessage());
             return;
         }
@@ -290,7 +325,6 @@ public class Main {
         evento.setNombre(nuevoNombre);
         evento.setLugar(nuevoLugar);
         evento.setFecha(nuevaFecha);
-        evento.setPrioridad(nuevaPrioridad);
 
         vista.mostrarMensaje("Evento actualizado.");
     }
@@ -331,30 +365,37 @@ public class Main {
             vista.mostrarTitulo("Gestión de Voluntarios");
             int opcion = vista.pedirOpcion(Arrays.asList(
                     "Registrar voluntario", "Listar voluntarios", "Editar voluntario",
-                    "Eliminar voluntario", "Buscar voluntario"
+                    "Eliminar voluntario", "Buscar voluntario", "Habilidades de un voluntario"
             ));
 
-            switch (opcion) {
-                case 0:
-                    registrarVoluntario(vista, gestor);
-                    break;
-                case 1:
-                    listarVoluntarios(vista, gestor);
-                    break;
-                case 2:
-                    editarVoluntario(vista, gestor);
-                    break;
-                case 3:
-                    eliminarVoluntario(vista, gestor);
-                    break;
-                case 4:
-                    buscarVoluntario(vista, gestor);
-                    break;
-                case -1:
-                    volver = true;
-                    break;
-                default:
-                    vista.mostrarError("Opción inválida.");
+            try {
+                switch (opcion) {
+                    case 0:
+                        registrarVoluntario(vista, gestor);
+                        break;
+                    case 1:
+                        listarVoluntarios(vista, gestor);
+                        break;
+                    case 2:
+                        editarVoluntario(vista, gestor);
+                        break;
+                    case 3:
+                        eliminarVoluntario(vista, gestor);
+                        break;
+                    case 4:
+                        buscarVoluntario(vista, gestor);
+                        break;
+                    case 5:
+                        menuHabilidades(vista, gestor);
+                        break;
+                    case -1:
+                        volver = true;
+                        break;
+                    default:
+                        vista.mostrarError("Opción inválida.");
+                }
+            } catch (OperacionCanceladaException e) {
+                vista.mostrarMensaje(e.getMessage());
             }
         }
     }
@@ -364,16 +405,15 @@ public class Main {
         String rut = vista.pedirRut("RUT");
         String comuna = vista.pedirTexto("Comuna");
         boolean disponible = vista.pedirBooleano("¿Está disponible?");
+        String habilidad = vista.pedirTexto("Habilidad principal (déjelo vacío si no aplica)");
 
         boolean ok = gestor.registrarVoluntario(nombre, rut, comuna, disponible);
         if (!ok) {
             vista.mostrarError("No se pudo registrar (RUT repetido o datos inválidos).");
             return;
         }
-        Voluntario v = gestor.buscarVoluntario(rut);
-        String habilidad = vista.pedirTexto("Habilidad principal (déjelo vacío si no aplica)");
         if (!StringUtils.isBlank(habilidad)) {
-            v.agregarHabilidad(new Habilidad(habilidad));
+            gestor.buscarVoluntario(rut).agregarHabilidad(new Habilidad(habilidad));
         }
         vista.mostrarMensaje("Voluntario registrado correctamente.");
     }
@@ -383,7 +423,7 @@ public class Main {
         for (Voluntario v : gestor.listarVoluntarios()) {
             lineas.add(v.toString());
         }
-        vista.mostrarTitulo("Listado de Voluntarios");
+        vista.mostrarTitulo("Listado de Voluntarios (" + gestor.getCantidadVoluntarios() + ")");
         vista.mostrarLista(lineas);
     }
 
@@ -431,7 +471,16 @@ public class Main {
         vista.mostrarTitulo("Asignar voluntarios disponibles a un evento");
         String idPrograma = vista.pedirTexto("ID del programa");
         String idEvento = vista.pedirTexto("ID del evento");
-        String habilidad = vista.pedirTexto("Habilidad requerida");
+
+        Programa programa = gestor.buscarPrograma(idPrograma);
+        Evento evento = programa == null ? null : programa.getEvento(idEvento);
+        String habilidad;
+        if (evento != null && evento.getTipo().equals("EMERGENCIA")) {
+            habilidad = evento.getHabilidadAsociada();
+            vista.mostrarMensaje("Evento de emergencia: se buscarán voluntarios con \"" + habilidad + "\".");
+        } else {
+            habilidad = vista.pedirTexto("Habilidad requerida");
+        }
 
         try {
             List<Voluntario> asignados = gestor.asignarVoluntariosDisponiblesAEvento(idPrograma, idEvento, habilidad);
@@ -451,13 +500,104 @@ public class Main {
     }
 
 
+    private static String pedirTipoEvento(Vista vista) {
+        vista.mostrarTitulo("Tipo de evento");
+        int idx = vista.pedirOpcion(TIPOS_EVENTO);
+        if (idx == -1) {
+            throw new OperacionCanceladaException();
+        }
+        return TIPOS_EVENTO.get(idx);
+    }
+
     private static String pedirPrioridad(Vista vista) {
-        while (true) {
-            int idx = vista.pedirOpcion(PRIORIDADES);
-            if (idx != -1) {
-                return PRIORIDADES.get(idx);
+        vista.mostrarTitulo("Prioridad del evento");
+        int idx = vista.pedirOpcion(PRIORIDADES);
+        if (idx == -1) {
+            throw new OperacionCanceladaException();
+        }
+        return PRIORIDADES.get(idx);
+    }
+
+    // Filtros de eventos
+
+    private static void eventosConCupos(Vista vista, GestorVoluntariado gestor) {
+        String idPrograma = vista.pedirTexto("ID del programa");
+        Programa programa = gestor.buscarPrograma(idPrograma);
+        if (programa == null) {
+            vista.mostrarError("No existe un programa con ese ID.");
+            return;
+        }
+        List<String> lineas = new ArrayList<>();
+        for (Evento e : programa.listarEventosConCuposDisponibles()) {
+            lineas.add(e.getIdEvento() + " - " + e.getNombre() + " (" + e.getCuposDisponibles() + " cupos libres)");
+        }
+        vista.mostrarTitulo("Eventos con cupos en " + idPrograma);
+        vista.mostrarLista(lineas);
+    }
+
+    private static void eventosPorPrioridad(Vista vista, GestorVoluntariado gestor) {
+        String idPrograma = vista.pedirTexto("ID del programa");
+        Programa programa = gestor.buscarPrograma(idPrograma);
+        if (programa == null) {
+            vista.mostrarError("No existe un programa con ese ID.");
+            return;
+        }
+        Prioridad prioridad = Prioridad.valueOf(pedirPrioridad(vista));
+        List<String> lineas = new ArrayList<>();
+        for (Evento e : programa.buscarEventosPorPrioridad(prioridad)) {
+            lineas.add(e.toString());
+        }
+        vista.mostrarTitulo("Eventos " + prioridad + " en " + idPrograma);
+        vista.mostrarLista(lineas);
+    }
+
+    // Habilidades de un voluntario
+
+    private static void menuHabilidades(Vista vista, GestorVoluntariado gestor) {
+        String rut = vista.pedirTexto("RUT del voluntario");
+        Voluntario v = gestor.buscarVoluntario(rut);
+        if (v == null) {
+            vista.mostrarError("No existe un voluntario con ese RUT.");
+            return;
+        }
+        boolean volver = false;
+        while (!volver) {
+            vista.mostrarTitulo("Habilidades de " + v.getNombre());
+            int opcion = vista.pedirOpcion(Arrays.asList(
+                    "Ver habilidades", "Agregar habilidad", "Eliminar habilidad", "Cambiar nombre de habilidad"
+            ));
+            switch (opcion) {
+                case 0: {
+                    List<String> lineas = new ArrayList<>();
+                    for (Habilidad h : v.getHabilidades()) {
+                        lineas.add(h.toString());
+                    }
+                    vista.mostrarLista(lineas);
+                    break;
+                }
+                case 1: {
+                    boolean ok = v.agregarHabilidad(vista.pedirTexto("Nombre de la habilidad"));
+                    vista.mostrarMensaje(ok ? "Habilidad agregada." : "No se agregó (vacía o ya la tiene).");
+                    break;
+                }
+                case 2: {
+                    boolean ok = v.eliminarHabilidad(vista.pedirTexto("Habilidad a eliminar"));
+                    vista.mostrarMensaje(ok ? "Habilidad eliminada." : "El voluntario no tiene esa habilidad.");
+                    break;
+                }
+                case 3: {
+                    String actual = vista.pedirTexto("Habilidad a cambiar");
+                    String nueva = vista.pedirTexto("Nuevo nombre");
+                    boolean ok = v.modificarHabilidad(actual, nueva, "");
+                    vista.mostrarMensaje(ok ? "Habilidad actualizada." : "No se pudo cambiar (no existe o el nuevo nombre ya está).");
+                    break;
+                }
+                case -1:
+                    volver = true;
+                    break;
+                default:
+                    vista.mostrarError("Opción inválida.");
             }
-            vista.mostrarError("Debe elegir una prioridad.");
         }
     }
 
@@ -467,7 +607,10 @@ public class Main {
         gestor.agregarPrograma("P1", "Reforestación Costera", "Programa de plantación de árboles", "01-03-2026");
         Programa p1 = gestor.buscarPrograma("P1");
         p1.agregarEvento("E1", "Jornada de plantación", "Con Con", "15-03-2026", 5, "NORMAL");
-        p1.agregarEvento("E2", "Respuesta a incendio forestal", "Quillota", "20-03-2026", 3, "CATASTROFE");
+        p1.agregarEvento("E2", "Respuesta a incendio forestal", "Quillota", "Quillota", "20-03-2026",
+                3, "CATASTROFE", "EMERGENCIA", "Primeros auxilios");
+        p1.agregarEvento("E3", "Curso de primeros auxilios", "Sede central", "Valparaíso", "25-03-2026",
+                10, "BAJA", "CAPACITACION", "Primeros auxilios");
 
         gestor.registrarVoluntario("Ana Pérez", "11111111-1", "Valparaíso", true);
         gestor.registrarVoluntario("Juan Soto", "22222222-2", "Quillota", true);

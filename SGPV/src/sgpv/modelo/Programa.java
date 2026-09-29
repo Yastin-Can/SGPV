@@ -1,7 +1,7 @@
 package sgpv.modelo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +31,7 @@ public class Programa {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.fechaInicio = fechaInicio;
-        this.eventos = new HashMap<>();
+        this.eventos = new LinkedHashMap<>();
     }
 
     // CRUD sobre la colección de eventos
@@ -58,6 +58,35 @@ public class Programa {
         }
     }
 
+    public boolean agregarEvento(String idEvento, String nombre, String lugar, String comuna, String fecha,
+            int cupos, String prioridad, String tipo, String habilidad){
+        if(idEvento == null || eventos.containsKey(idEvento)){
+            return false;
+        }
+        try{
+            Prioridad p = Prioridad.valueOf(prioridad.trim().toUpperCase());
+            String tipoNormalizado = StringUtils.isBlank(tipo) ? "REGULAR" : tipo.trim().toUpperCase();
+            Evento nuevo;
+            switch(tipoNormalizado){
+                case "EMERGENCIA":
+                    nuevo = new EventoEmergencia(idEvento, nombre, lugar, comuna, fecha, cupos, p, habilidad);
+                    break;
+                case "CAPACITACION":
+                    nuevo = new EventoCapacitacion(idEvento, nombre, lugar, comuna, fecha, cupos, p, habilidad);
+                    break;
+                case "REGULAR":
+                    nuevo = new Evento(idEvento, nombre, lugar, comuna, fecha, cupos, p);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Tipo de evento desconocido: " + tipo);
+            }
+            return agregarEvento(nuevo);
+        }catch(IllegalArgumentException | NullPointerException e){
+            System.err.println("No se pudo crear el evento \"" + idEvento + "\": " + e.getMessage());
+            return false;
+        }
+    }
+
     public boolean eliminarEvento(String idEvento){
         if(idEvento == null) return false;
         Evento evento = eventos.get(idEvento);
@@ -78,7 +107,7 @@ public class Programa {
     }
 
     public Map<String, Evento> getEventos(){
-        return new HashMap<>(eventos); // copia defensiva, para no exponer el mapa real
+        return new LinkedHashMap<>(eventos); // copia defensiva, para no exponer el mapa real
     }
 
     public int getCantidadEventos(){
